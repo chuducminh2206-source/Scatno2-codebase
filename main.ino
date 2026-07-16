@@ -1,41 +1,64 @@
-int buttonA;
-int buttonAPrev;
-int buttonB;
-int buttonBPrev;
+/* Button vars -- changed buttonA to bwd and fwd to fwd to be consistent with schematic */
+int bwd;
+int bwdPrev;
+int fwd;
+int fwdPrev;
+/* Rotation var */
+#define enc_dt 2
+#define enc_clk 3
+#define button 4
+volatile int encoderValue = 0;
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Serial communications started");
 
-  buttonA = digitalRead(4);
-  buttonB = digitalRead(5);
-  buttonAPrev = buttonA;
-  buttonBPrev = buttonB;
+  bwd = digitalRead(4);
+  fwd = digitalRead(5);
+  bwdPrev = bwd;
+  fwdPrev = fwd;
+  pinMode(enc_dt, INPUT_PULLUP);
+  pinMode(enc_clk, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(enc_clk), encoder, FALLING);
 }
 
 void loop() {
-  buttonA = digitalRead(4);
-  buttonB = digitalRead(5);
-
+  
+  /* Rotation control */
+  Serial.println(encoderValue);
+  delay(100);
+  
   /* Red button controls */
-  if(buttonAPrev == 0 && buttonA == 1) {
-    Serial.println("Button A pressed");
+  bwd = digitalRead(4);
+  fwd = digitalRead(5);
+  
+  if(bwdPrev == 0 && bwd == 1) {
+    Serial.println("Button bwd pressed");
   }
   
-  if(buttonAPrev == 1 && buttonA == 0) {
-    Serial.println("Button A released");
+  if(bwdPrev == 1 && bwd == 0) {
+    Serial.println("Button bwd released");
   }
   
   /* Blue button controls */
-  if(buttonBPrev == 0 && buttonB == 1) {
+  if(fwdPrev == 0 && fwd == 1) {
     Serial.println("Button B pressed");
   }
   
-  if(buttonBPrev == 1 && buttonB == 0) {
+  if(fwdPrev == 1 && fwd == 0) {
     Serial.println("Button B released");
   }
 
 
-  buttonAPrev = buttonA;
-  buttonBPrev = buttonB;
+  bwdPrev = bwd;
+  fwdPrev = fwd;
+}
+
+void encoder() {
+ if (digitalRead(enc_clk) == digitalRead(enc_dt)) {
+ encoderValue++;
+ }
+ else {
+ encoderValue--;
+ }
 }
